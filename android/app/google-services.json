@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "874797515270",
+    "project_id": "daily-sales-1a8b8",
+    "storage_bucket": "daily-sales-1a8b8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874797515270:android:6c78fbefd3e53681bbb987",
+        "android_client_info": {
+          "package_name": "com.example.daily_sales"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWGdZAus11aLxJR5txIP8NJ2ELItuxVho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
