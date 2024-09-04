@@ -13,6 +13,35 @@ class ProdutoTablePage extends StatefulWidget {
 class _ProdutoTablePageState extends State<ProdutoTablePage> {
   late ProdutoTableDataSource produtoDataSource;
   String selectedSucursal = 'Total'; // Default selection
+  String? selectedCategory; // Selected category for dropdown filter
+  List<String> categories = []; // List of categories
+  bool isLoadingCategories = true; // To track the loading state of categories
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories(); // Fetch categories when the widget is initialized
+  }
+
+  Future<void> _fetchCategories() async {
+    try {
+      final snapshot = await FirestoreService().getProdutoTableData().first;
+      setState(() {
+        categories = snapshot
+            .map((data) => data.categoria ?? 'Unknown')
+            .toSet()
+            .toList();
+        categories.sort();
+        isLoadingCategories = false;
+      });
+    } catch (error) {
+      // Handle the error and set loading state to false
+      print('Error fetching categories: $error');
+      setState(() {
+        isLoadingCategories = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +59,69 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
             _buildRadioButton('Pemba'),
           ],
         ),
+        // Custom Dropdown for filtering by category
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /*const Text(
+                'Filtrar por Categoria',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),*/
+              const SizedBox(height: 2),
+              isLoadingCategories
+                  ? const Center(child: CircularProgressIndicator()) // Show loading indicator
+                  : DropdownButton<String>(
+                value: selectedCategory,
+                hint: const Text(
+                  'Todas categorias',
+                  style: TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
+                icon: const Icon(Icons.arrow_drop_down),
+                iconSize: 24,
+                elevation: 16,
+                isExpanded: true,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.black,
+                ),
+                underline: Container(
+                  height: 2,
+                  color: Colors.deepPurpleAccent,
+                ),
+                items: [
+                  const DropdownMenuItem<String>(
+                    value: null, // "All Categories"
+                    child: Text(
+                      'Todas categorias',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                  ...categories.map((String category) {
+                    return DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(
+                        category,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    );
+                  }).toList(),
+                ],
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedCategory = newValue;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
         Expanded(
           child: StreamBuilder<List<ProdutoTableData>>(
             stream: FirestoreService().getProdutoTableData(),
@@ -42,27 +134,27 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                 return const Center(child: Text('No data available'));
               }
 
-              // Filter the data based on the selected sucursal
+              // Filter the data based on the selected sucursal and category
               final filteredData = snapshot.data!
-                  .where((data) => data.sucursal == selectedSucursal)
+                  .where((data) =>
+              data.sucursal == selectedSucursal &&
+                  (selectedCategory == null || data.categoria == selectedCategory))
                   .toList();
 
               // Assign filtered data to the datasource
               produtoDataSource = ProdutoTableDataSource(filteredData);
 
               return SfDataGrid(
-                key: UniqueKey(), // Ensures the DataGrid is rebuilt and refreshed properly
-                headerRowHeight: 40, // Adjust this value to your desired height
-                rowHeight: 40, // Adjust this value to your desired height
+                key: UniqueKey(),
+                headerRowHeight: 40,
+                rowHeight: 40,
                 source: produtoDataSource,
-                gridLinesVisibility: GridLinesVisibility.none, // Remove both horizontal and vertical gridlines
+                gridLinesVisibility: GridLinesVisibility.none,
                 tableSummaryRows: [
                   GridTableSummaryRow(
                     color: Colors.deepPurple.shade50,
-                    showSummaryInRow: true,
-                    title:
-                    'No. de produtos = {Count}, Total Volume = {SumQtd}, Total em Valor = {SumValor}',
-                    titleColumnSpan: 4, // Span the title across the first column
+                    title: 'No. de produtos = {Count}, Total Volume = {SumQtd}, Total em Valor = {SumValor}',
+                    titleColumnSpan: 4,
                     columns: [
                       const GridSummaryColumn(
                         name: 'Count',
@@ -80,7 +172,7 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                         summaryType: GridSummaryType.sum,
                       ),
                     ],
-                    position: GridTableSummaryRowPosition.top,
+                    position: GridTableSummaryRowPosition.bottom,
                   ),
                 ],
                 columns: <GridColumn>[
@@ -90,7 +182,7 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                       padding: const EdgeInsets.all(8.0),
                       alignment: Alignment.centerLeft,
                       decoration: const BoxDecoration(
-                        color: Colors.deepPurple, // Set header background color
+                        color: Colors.deepPurple,
                       ),
                       child: const Text(
                         'Descricao',
@@ -99,13 +191,13 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                     ),
                   ),
                   GridColumn(
-                    maximumWidth: 100, // Set maximum width for the 'qtd' column
+                    maximumWidth: 100,
                     columnName: 'qtd',
                     label: Container(
                       padding: const EdgeInsets.all(8.0),
                       alignment: Alignment.center,
                       decoration: const BoxDecoration(
-                        color: Colors.deepPurple, // Set header background color
+                        color: Colors.deepPurple,
                       ),
                       child: const Text(
                         'Qtd',
@@ -114,13 +206,13 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                     ),
                   ),
                   GridColumn(
-                    maximumWidth: 100, // Set maximum width for the 'valor' column
+                    maximumWidth: 100,
                     columnName: 'valor',
                     label: Container(
                       padding: const EdgeInsets.all(8.0),
                       alignment: Alignment.center,
                       decoration: const BoxDecoration(
-                        color: Colors.deepPurple, // Set header background color
+                        color: Colors.deepPurple,
                       ),
                       child: const Text(
                         'Valor',
@@ -129,8 +221,8 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                     ),
                   ),
                 ],
-                columnWidthMode: ColumnWidthMode.fill, // Ensure columns fill the available width
-                allowColumnsResizing: true, // Allow resizing if needed
+                columnWidthMode: ColumnWidthMode.fill,
+                allowColumnsResizing: true,
               );
             },
           ),
@@ -142,7 +234,6 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
   Widget _buildRadioButton(String value) {
     return Row(
       children: [
-        // Adjust the size of the Radio button
         Radio<String>(
           value: value,
           groupValue: selectedSucursal,
@@ -151,25 +242,21 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
               selectedSucursal = newValue!;
             });
           },
-          // Adjust size using materialTapTargetSize
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        // Adjust the text size
         Text(
           value,
-          style: const TextStyle(fontSize: 10), // Smaller text size
+          style: const TextStyle(fontSize: 10),
         ),
       ],
     );
   }
-
 }
 
 class ProdutoTableDataSource extends DataGridSource {
   List<DataGridRow> _produtoDataGridRows = [];
 
   ProdutoTableDataSource(List<ProdutoTableData> produtoData) {
-    // Sort data by 'valor' field (y) in descending order
     produtoData.sort((a, b) => b.valor.compareTo(a.valor));
 
     _produtoDataGridRows = produtoData
@@ -185,7 +272,8 @@ class ProdutoTableDataSource extends DataGridSource {
   List<DataGridRow> get rows => _produtoDataGridRows;
 
   @override
-  Widget? buildTableSummaryCellWidget(GridTableSummaryRow summaryRow, GridSummaryColumn? summaryColumn, RowColumnIndex rowColumnIndex, String summaryValue) {
+  Widget? buildTableSummaryCellWidget(GridTableSummaryRow summaryRow,
+      GridSummaryColumn? summaryColumn, RowColumnIndex rowColumnIndex, String summaryValue) {
     return Container(
       padding: const EdgeInsets.all(10.0),
       child: Text(
@@ -200,7 +288,9 @@ class ProdutoTableDataSource extends DataGridSource {
     int rowIndex = _produtoDataGridRows.indexOf(row);
 
     // Alternating row colors
-    Color backgroundColor = rowIndex % 2 == 0 ? Colors.grey.shade100 : Colors.white;
+    Color backgroundColor = rowIndex % 2 == 0
+        ? Colors.grey.shade100 // Light grey color for even rows
+        : Colors.white; // White color for odd rows
 
     return DataGridRowAdapter(
       color: backgroundColor, // Set the alternating background color
@@ -209,7 +299,7 @@ class ProdutoTableDataSource extends DataGridSource {
           padding: const EdgeInsets.all(8.0),
           alignment: Alignment.centerLeft,
           child: Text(
-            row.getCells()[0].value.toString(),
+            row.getCells()[0].value!,
             style: const TextStyle(fontSize: 11),
           ),
         ),
@@ -217,7 +307,7 @@ class ProdutoTableDataSource extends DataGridSource {
           padding: const EdgeInsets.all(8.0),
           alignment: Alignment.center,
           child: Text(
-            Utils.formatNumberWithCommas(row.getCells()[1].value!.toInt()), // Format qtd with commas
+            Utils.formatNumberWithCommas(row.getCells()[1].value!.toInt()),
             style: const TextStyle(fontSize: 11),
           ),
         ),
@@ -225,7 +315,7 @@ class ProdutoTableDataSource extends DataGridSource {
           padding: const EdgeInsets.all(8.0),
           alignment: Alignment.center,
           child: Text(
-            Utils.formatNumberWithCommas(row.getCells()[2].value!.toInt()), // Format valor with commas
+            Utils.formatNumberWithCommas(row.getCells()[2].value!.toInt()),
             style: const TextStyle(fontSize: 11),
           ),
         ),
