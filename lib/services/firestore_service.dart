@@ -22,6 +22,7 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) {
       double totalValue = 0.0;
+      double totalValueToday = 0.0;
       String? date;
       List<SucursalChartData> sucursalData = [];
 
@@ -29,16 +30,20 @@ class FirestoreService {
         final nivel = doc['nivel'] as String;
         final valor = (doc['valor'] as num).toDouble();
         final percentual = (doc['percentual'] as num).toDouble();
+        final valor_do_dia = (doc['valor_do_dia'] as num).toDouble();
 
         if (nivel == 'Sucursal') {
           sucursalData.add(SucursalChartData(
             doc['descricao'],
-            Utils.roundToDecimal(valor / 1000000, 1),
+            //Utils.roundToDecimal(valor / 1000000, 1),
+            valor,
             Utils.roundToDecimal(percentual, 0),
             Utils.formatDateTime((doc['data'] as Timestamp).toDate()),
+            Utils.roundToDecimal(valor_do_dia, 0),
           ));
         } else if (nivel == 'Total') {
           totalValue = valor;
+          totalValueToday = valor_do_dia;
           if (doc['data'] != null) {
             DateTime dateTime = (doc['data'] as Timestamp).toDate();
             date = Utils.formatDateTime(dateTime);
@@ -48,12 +53,13 @@ class FirestoreService {
 
       sucursalData.sort((a, b) {
         List<String> order = ['Maputo', 'Beira', 'Tete', 'Nampula', 'Pemba'];
-        return order.indexOf(a.x).compareTo(order.indexOf(b.x));
+        return order.indexOf(a.sucursal).compareTo(order.indexOf(b.sucursal));
       });
 
       return {
         'sucursalData': sucursalData,
-        'totalValue': Utils.roundToDecimal(totalValue / 1000000, 1).toString(),
+        'totalValue': Utils.roundToDecimal(totalValue / 1000000, 1),
+        'totalValueToday': Utils.formatNumberWithCommas(totalValueToday.toInt()),
         'date': date,
       };
     });
@@ -99,9 +105,10 @@ class FirestoreService {
         final descricao = doc['descricao'] as String;
         final qtd = (doc['qtd'] as num).toDouble();
         final valor = (doc['valor'] as num).toDouble();
+        final stock = (doc['stock'] as num).toDouble();
 
         return ProdutoTableData(
-            sucursal, principal, categoria, descricao, qtd, valor);
+            sucursal, principal, categoria, descricao, qtd, valor, stock);
       }).toList();
     });
   }

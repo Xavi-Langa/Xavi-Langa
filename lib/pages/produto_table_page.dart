@@ -3,9 +3,10 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:daily_sales/services/firestore_service.dart'; // Your FirestoreService
 import 'package:daily_sales/utils/utils.dart';
 import '../models/produto_table_data.dart';
-import 'package:syncfusion_flutter_core/theme.dart';
 
 class ProdutoTablePage extends StatefulWidget {
+  const ProdutoTablePage({super.key});
+
   @override
   _ProdutoTablePageState createState() => _ProdutoTablePageState();
 }
@@ -74,51 +75,53 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
               ),*/
               const SizedBox(height: 2),
               isLoadingCategories
-                  ? const Center(child: CircularProgressIndicator()) // Show loading indicator
+                  ? const Center(
+                      child:
+                          CircularProgressIndicator()) // Show loading indicator
                   : DropdownButton<String>(
-                value: selectedCategory,
-                hint: const Text(
-                  'Todas categorias',
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-                icon: const Icon(Icons.arrow_drop_down),
-                iconSize: 24,
-                elevation: 16,
-                isExpanded: true,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black,
-                ),
-                underline: Container(
-                  height: 2,
-                  color: Colors.deepPurpleAccent,
-                ),
-                items: [
-                  const DropdownMenuItem<String>(
-                    value: null, // "All Categories"
-                    child: Text(
-                      'Todas categorias',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ),
-                  ...categories.map((String category) {
-                    return DropdownMenuItem<String>(
-                      value: category,
-                      child: Text(
-                        category,
-                        style: const TextStyle(fontSize: 12),
+                      value: selectedCategory,
+                      hint: const Text(
+                        'Todas categorias',
+                        style: TextStyle(
+                          fontSize: 12,
+                        ),
                       ),
-                    );
-                  }).toList(),
-                ],
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedCategory = newValue;
-                  });
-                },
-              ),
+                      icon: const Icon(Icons.arrow_drop_down),
+                      iconSize: 24,
+                      elevation: 16,
+                      isExpanded: true,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                      ),
+                      underline: Container(
+                        height: 2,
+                        color: Colors.deepPurpleAccent,
+                      ),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null, // "All Categories"
+                          child: Text(
+                            'Todas categorias',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                        ...categories.map((String category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(
+                              category,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          );
+                        }),
+                      ],
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedCategory = newValue;
+                        });
+                      },
+                    ),
             ],
           ),
         ),
@@ -137,8 +140,9 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
               // Filter the data based on the selected sucursal and category
               final filteredData = snapshot.data!
                   .where((data) =>
-              data.sucursal == selectedSucursal &&
-                  (selectedCategory == null || data.categoria == selectedCategory))
+                      data.sucursal == selectedSucursal &&
+                      (selectedCategory == null ||
+                          data.categoria == selectedCategory))
                   .toList();
 
               // Assign filtered data to the datasource
@@ -150,24 +154,33 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                 rowHeight: 40,
                 source: produtoDataSource,
                 gridLinesVisibility: GridLinesVisibility.none,
+                allowSorting: true,
+                allowMultiColumnSorting: true,
+                allowTriStateSorting: true,
                 tableSummaryRows: [
                   GridTableSummaryRow(
+                    showSummaryInRow: false,
                     color: Colors.deepPurple.shade50,
-                    title: 'No. de produtos = {Count}, Total Volume = {SumQtd}, Total em Valor = {SumValor}',
-                    titleColumnSpan: 4,
+                    title: 'No. de produtos: {descricao}',
+                    titleColumnSpan: 1,
                     columns: [
                       const GridSummaryColumn(
-                        name: 'Count',
+                        name: 'descricao',
                         columnName: 'descricao',
                         summaryType: GridSummaryType.count,
                       ),
                       const GridSummaryColumn(
-                        name: 'SumQtd',
+                        name: 'stock',
+                        columnName: 'stock',
+                        summaryType: GridSummaryType.sum,
+                      ),
+                      const GridSummaryColumn(
+                        name: 'qtd',
                         columnName: 'qtd',
                         summaryType: GridSummaryType.sum,
                       ),
                       const GridSummaryColumn(
-                        name: 'SumValor',
+                        name: 'valor',
                         columnName: 'valor',
                         summaryType: GridSummaryType.sum,
                       ),
@@ -178,6 +191,7 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                 columns: <GridColumn>[
                   GridColumn(
                     columnName: 'descricao',
+                    allowSorting: false,
                     label: Container(
                       padding: const EdgeInsets.all(8.0),
                       alignment: Alignment.centerLeft,
@@ -186,6 +200,21 @@ class _ProdutoTablePageState extends State<ProdutoTablePage> {
                       ),
                       child: const Text(
                         'Descricao',
+                        style: TextStyle(fontSize: 12, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  GridColumn(
+                    maximumWidth: 100,
+                    columnName: 'stock',
+                    label: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: Colors.deepPurple,
+                      ),
+                      child: const Text(
+                        'Stock',
                         style: TextStyle(fontSize: 12, color: Colors.white),
                       ),
                     ),
@@ -261,19 +290,24 @@ class ProdutoTableDataSource extends DataGridSource {
 
     _produtoDataGridRows = produtoData
         .map<DataGridRow>((data) => DataGridRow(cells: [
-      DataGridCell<String>(columnName: 'descricao', value: data.descricao),
-      DataGridCell<double>(columnName: 'qtd', value: data.qtd),
-      DataGridCell<double>(columnName: 'valor', value: data.valor),
-    ]))
+              DataGridCell<String>(
+                  columnName: 'descricao', value: data.descricao),
+              DataGridCell<double>(columnName: 'stock', value: data.stock),
+              DataGridCell<double>(columnName: 'qtd', value: data.qtd),
+              DataGridCell<double>(columnName: 'valor', value: data.valor),
+            ]))
         .toList();
   }
 
   @override
   List<DataGridRow> get rows => _produtoDataGridRows;
 
-  @override
-  Widget? buildTableSummaryCellWidget(GridTableSummaryRow summaryRow,
-      GridSummaryColumn? summaryColumn, RowColumnIndex rowColumnIndex, String summaryValue) {
+  /*@override
+  Widget? buildTableSummaryCellWidget(
+      GridTableSummaryRow summaryRow,
+      GridSummaryColumn? summaryColumn,
+      RowColumnIndex rowColumnIndex,
+      String summaryValue) {
     return Container(
       padding: const EdgeInsets.all(10.0),
       child: Text(
@@ -281,19 +315,57 @@ class ProdutoTableDataSource extends DataGridSource {
         style: const TextStyle(fontSize: 12, color: Colors.black),
       ),
     );
+  }*/
+
+  @override
+  Widget? buildTableSummaryCellWidget(
+      GridTableSummaryRow summaryRow,
+      GridSummaryColumn? summaryColumn,
+      RowColumnIndex rowColumnIndex,
+      String summaryValue) {
+    // Format the sum values for 'stock', 'qtd', and 'valor'
+    if (summaryColumn != null) {
+      if (summaryColumn.name == 'stock' ||
+          summaryColumn.name == 'qtd' ||
+          summaryColumn.name == 'valor') {
+        double sumValue = double.tryParse(summaryValue) ?? 0.0;
+
+        // Apply formatting (e.g., add commas and 2 decimal places)
+        summaryValue = Utils.formatNumberWithCommas(sumValue.toInt());
+      }
+    }
+
+    // Check if the title property of the GridTableSummaryRow contains 'descricao'
+    //Alignment alignment = Alignment.center; // Default to center
+    //if (summaryRow.title?.contains('{descricao}') ?? false) {
+      //alignment = Alignment.centerLeft; // Align left if 'descricao' is in the title
+    //}
+
+
+    // Check if the summary is for the 'descricao' column
+    /*Alignment alignment = Alignment.center; // Default to center
+    if (summaryColumn != null && summaryColumn.name == 'descricao') {
+      alignment = Alignment.centerLeft; // Align left for 'descricao'
+    }*/
+
+    return Container(
+      padding: const EdgeInsets.all(10.0),
+      alignment: Alignment.center, // Align to the right for numeric values
+      child: Text(
+        summaryValue,
+        style: const TextStyle(fontSize: 12, color: Colors.black),
+      ),
+    );
   }
+
 
   @override
   DataGridRowAdapter buildRow(DataGridRow row) {
     int rowIndex = _produtoDataGridRows.indexOf(row);
 
-    // Alternating row colors
-    Color backgroundColor = rowIndex % 2 == 0
-        ? Colors.grey.shade100 // Light grey color for even rows
-        : Colors.white; // White color for odd rows
-
     return DataGridRowAdapter(
-      color: backgroundColor, // Set the alternating background color
+      color: Utils.alternateTableLineColors(
+          rowIndex), // Set the alternating background color
       cells: [
         Container(
           padding: const EdgeInsets.all(8.0),
@@ -316,6 +388,14 @@ class ProdutoTableDataSource extends DataGridSource {
           alignment: Alignment.center,
           child: Text(
             Utils.formatNumberWithCommas(row.getCells()[2].value!.toInt()),
+            style: const TextStyle(fontSize: 11),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(8.0),
+          alignment: Alignment.center,
+          child: Text(
+            Utils.formatNumberWithCommas(row.getCells()[3].value!.toInt()),
             style: const TextStyle(fontSize: 11),
           ),
         ),

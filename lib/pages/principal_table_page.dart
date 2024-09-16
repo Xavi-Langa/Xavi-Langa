@@ -5,6 +5,8 @@ import 'package:daily_sales/models/principal_table_data.dart'; // Your Principal
 import 'package:daily_sales/utils/utils.dart';
 
 class PrincipalTablePage extends StatefulWidget {
+  const PrincipalTablePage({super.key});
+
   @override
   _PrincipalTablePageState createState() => _PrincipalTablePageState();
 }
@@ -124,12 +126,12 @@ class PrincipalTableDataSource extends DataGridSource {
     int rowIndex = _principalDataGridRows.indexOf(row);
 
     // Alternating row colors
-    Color backgroundColor = rowIndex % 2 == 0
+    /*Color backgroundColor = rowIndex % 2 == 0
         ? Colors.grey.shade100 // Light grey color for even rows
-        : Colors.white; // White color for odd rows
+        : Colors.white; // White color for odd rows*/
 
     return DataGridRowAdapter(
-      color: backgroundColor, // Set the alternating background color
+      color: Utils.alternateTableLineColors(rowIndex), // Set the alternating background color
       cells: [
         Container(
           padding: const EdgeInsets.all(8.0),

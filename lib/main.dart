@@ -19,7 +19,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class ValorPage extends StatelessWidget {
-  const ValorPage({Key? key}) : super(key: key);
+  const ValorPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +145,7 @@ class ValorPage extends StatelessWidget {
                 return SizedBox(
                   width: constraints.maxWidth,
                   height: constraints.maxHeight,
-                  child: PrincipalTablePage(),
+                  child: const PrincipalTablePage(),
                 );
               },
             ),
@@ -157,7 +157,7 @@ class ValorPage extends StatelessWidget {
 }
 
 class QtdPage extends StatelessWidget {
-  const QtdPage({Key? key}) : super(key: key);
+  const QtdPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +168,7 @@ class QtdPage extends StatelessWidget {
           return SizedBox(
             width: constraints.maxWidth,
             height: constraints.maxHeight,
-            child: ProdutoTablePage(),
+            child: const ProdutoTablePage(),
           );
         },
       ),

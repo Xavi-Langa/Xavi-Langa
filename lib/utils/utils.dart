@@ -1,3 +1,5 @@
+
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
 
@@ -28,5 +30,9 @@ class Utils {
     final now = DateTime.now();
     final formatter = DateFormat('yyyyMM');
     return formatter.format(now);
+  }
+
+  static Color alternateTableLineColors(int rowIndex){
+    return rowIndex.isEven ? Colors.grey.shade100 : Colors.white;
   }
 }

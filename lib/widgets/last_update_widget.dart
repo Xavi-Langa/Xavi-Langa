@@ -4,7 +4,7 @@ import 'package:daily_sales/services/firestore_service.dart'; // Firestore servi
 import 'package:daily_sales/utils/utils.dart'; // Utils for formatting
 
 class LastUpdateWidget extends StatelessWidget {
-  const LastUpdateWidget({Key? key}) : super(key: key);
+  const LastUpdateWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
