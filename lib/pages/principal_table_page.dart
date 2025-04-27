@@ -34,7 +34,8 @@ class _PrincipalTablePageState extends State<PrincipalTablePage> {
           headerRowHeight: 40, // Adjust this value to your desired height
           rowHeight: 40, // Adjust this value to your desired height
           source: principalDataSource,
-          gridLinesVisibility: GridLinesVisibility.none, // Remove both horizontal and vertical gridlines
+          gridLinesVisibility: GridLinesVisibility
+              .none, // Remove both horizontal and vertical gridlines
           columns: <GridColumn>[
             GridColumn(
               columnName: 'principal',
@@ -46,7 +47,9 @@ class _PrincipalTablePageState extends State<PrincipalTablePage> {
                 ),
                 child: const Text(
                   'Principal',
-                  style: TextStyle(fontSize: 12, color: Colors.white), // Set text style for the header
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white), // Set text style for the header
                 ),
               ),
             ),
@@ -93,7 +96,8 @@ class _PrincipalTablePageState extends State<PrincipalTablePage> {
               ),
             ),
           ],
-          columnWidthMode: ColumnWidthMode.fill, // Ensure columns fill the available width
+          columnWidthMode:
+              ColumnWidthMode.fill, // Ensure columns fill the available width
           allowColumnsResizing: true, // Allow resizing if needed
         );
       },
@@ -110,11 +114,18 @@ class PrincipalTableDataSource extends DataGridSource {
 
     _principalDataGridRows = principalData
         .map<DataGridRow>((data) => DataGridRow(cells: [
-      DataGridCell<String>(columnName: 'descricao', value: data.descricao),
-      DataGridCell<String>(columnName: 'tons', value: data.tons.round().toString()),
-      DataGridCell<String>(columnName: 'valor', value: Utils.roundToDecimal(data.valor / 1000000, 1).toString()),
-      DataGridCell<String>(columnName: 'contribuicao', value: '${data.percentual.toStringAsFixed(0)}%'),
-    ]))
+              DataGridCell<String>(
+                  columnName: 'descricao', value: data.descricao),
+              DataGridCell<String>(
+                  columnName: 'tons', value: data.tons.round().toString()),
+              DataGridCell<String>(
+                  columnName: 'valor',
+                  value:
+                      Utils.roundToDecimal(data.valor / 1000000, 1).toString()),
+              DataGridCell<String>(
+                  columnName: 'contribuicao',
+                  value: '${data.percentual.toStringAsFixed(0)}%'),
+            ]))
         .toList();
   }
 
@@ -131,7 +142,8 @@ class PrincipalTableDataSource extends DataGridSource {
         : Colors.white; // White color for odd rows*/
 
     return DataGridRowAdapter(
-      color: Utils.alternateTableLineColors(rowIndex), // Set the alternating background color
+      color: Utils.alternateTableLineColors(
+          rowIndex), // Set the alternating background color
       cells: [
         Container(
           padding: const EdgeInsets.all(8.0),

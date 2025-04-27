@@ -65,7 +65,6 @@ class FirestoreService {
     });
   }
 
-  // New method to get documents where "nivel = Principal"
   Stream<List<PrincipalTableData>> getPrincipalTableData() {
     final currentMonth = Utils.getCurrentMonth();
 
@@ -87,7 +86,6 @@ class FirestoreService {
     });
   }
 
-  // New method to get documents where "nivel = Produto"
   Stream<List<ProdutoTableData>> getProdutoTableData() {
     final currentMonth = Utils.getCurrentMonth();
 
@@ -95,7 +93,6 @@ class FirestoreService {
         .collection('Vendas')
         .doc(currentMonth)
         .collection('Qtd')
-        //.where('sucursal', isEqualTo: 'Total')
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
